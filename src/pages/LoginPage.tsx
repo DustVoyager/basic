@@ -1,7 +1,7 @@
-import "./App.css";
-import { LoginForm } from "./components/LoginForm";
+// src/pages/LoginPage.tsx
+import { LoginForm } from "../components/LoginForm";
 
-function App() {
+const LoginPage = () => {
   const handleLoginSuccess = () => {};
 
   return (
@@ -10,6 +10,6 @@ function App() {
       <LoginForm onLoginSuccess={handleLoginSuccess} />
     </div>
   );
-}
+};
 
-export default App;
+export default LoginPage;
