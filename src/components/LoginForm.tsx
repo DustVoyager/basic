@@ -1,7 +1,6 @@
 // src/components/LoginForm.tsx
 import { useState } from "react";
-
-import { setTokens } from "../utils/tokenStorage";
+import { useAuthStore } from "../stores/authStore";
 import { login } from "../api/auth";
 
 interface Props {
@@ -13,11 +12,13 @@ export const LoginForm = ({ onLoginSuccess }: Props) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const setTokens = useAuthStore((state) => state.setTokens);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const data = await login({ email, password });
-      setTokens(data.accessToken, data.refreshToken);
+      setTokens(data.accessToken, data.refreshToken); // 상태 저장
       onLoginSuccess();
     } catch (err) {
       setError("로그인 실패: 이메일 또는 비밀번호를 확인하세요.");
