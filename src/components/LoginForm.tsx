@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useAuthStore } from "../stores/authStore";
 import { login } from "../api/auth";
+import Button from "./ui/Button";
 
 interface Props {
   onLoginSuccess: () => void;
@@ -41,7 +42,7 @@ export const LoginForm = ({ onLoginSuccess }: Props) => {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-      <button type="submit">로그인</button>
+      <Button type="submit">로그인</Button>
       {error && <p style={{ color: "red" }}>{error}</p>}
     </form>
   );
