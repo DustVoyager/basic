@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./Input.module.css";
 
 type InputSize = "sm" | "md" | "lg";
+type LabelPosition = "inline" | "top";
 
 interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
@@ -12,6 +13,7 @@ interface InputProps
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   required?: boolean;
+  labelPosition?: LabelPosition;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -24,6 +26,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       leftIcon,
       rightIcon,
       required,
+      labelPosition = "inline",
       className,
       disabled,
       ...props
@@ -41,24 +44,40 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       .filter(Boolean)
       .join(" ");
 
+    const containerClasses = [
+      styles.inputContainer,
+      labelPosition === "top" && styles.inputContainerTop,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const labelClasses = [
+      styles.label,
+      labelPosition === "top" && styles.labelTop,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     return (
       <div className={styles.inputWrapper}>
-        {label && (
-          <label className={styles.label}>
-            {label}
-            {required && <span className={styles.required}>*</span>}
-          </label>
-        )}
-        <div className={styles.inputWrapper}>
-          {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
-          <input
-            ref={ref}
-            className={inputClasses}
-            disabled={disabled}
-            aria-invalid={error ? "true" : "false"}
-            {...props}
-          />
-          {rightIcon && <span className={styles.rightIcon}>{rightIcon}</span>}
+        <div className={containerClasses}>
+          {label && (
+            <label className={labelClasses}>
+              {label}
+              {required && <span className={styles.required}>*</span>}
+            </label>
+          )}
+          <div className={styles.inputWrapper}>
+            {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
+            <input
+              ref={ref}
+              className={inputClasses}
+              disabled={disabled}
+              aria-invalid={error ? "true" : "false"}
+              {...props}
+            />
+            {rightIcon && <span className={styles.rightIcon}>{rightIcon}</span>}
+          </div>
         </div>
         {(error || helperText) && (
           <span
