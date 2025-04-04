@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Checkbox.module.css";
+import styles from "./Checkbox.module.scss";
 
 type CheckboxSize = "sm" | "md" | "lg";
 
