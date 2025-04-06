@@ -2,11 +2,16 @@
 import axiosInstance from "./axiosInstance";
 
 interface LoginPayload {
-  email: string;
+  userId: string;
   password: string;
 }
 
-export const login = async (payload: LoginPayload) => {
-  const response = await axiosInstance.post("/auth/login", payload);
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export const login = async (data: LoginPayload): Promise<LoginResponse> => {
+  const response = await axiosInstance.post<LoginResponse>("/auth/login", data);
   return response.data;
 };

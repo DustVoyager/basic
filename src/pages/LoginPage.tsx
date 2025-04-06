@@ -1,15 +1,14 @@
 // src/pages/LoginPage.tsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { LoginForm } from "../components/LoginForm";
 
-const LoginPage = () => {
-  const handleLoginSuccess = () => {};
+export default function LoginPage() {
+  const navigate = useNavigate();
 
-  return (
-    <div>
-      <h1>로그인</h1>
-      <LoginForm onLoginSuccess={handleLoginSuccess} />
-    </div>
-  );
-};
+  const handleLoginSuccess = () => {
+    navigate("/");
+  };
 
-export default LoginPage;
+  return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+}

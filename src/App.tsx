@@ -1,15 +1,7 @@
 import "./App.scss";
-import { LoginForm } from "./components/LoginForm";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 
-function App() {
-  const handleLoginSuccess = () => {};
-
-  return (
-    <div>
-      <h1>로그인</h1>
-      <LoginForm onLoginSuccess={handleLoginSuccess} />
-    </div>
-  );
+export default function App() {
+  return <RouterProvider router={router} />;
 }
-
-export default App;

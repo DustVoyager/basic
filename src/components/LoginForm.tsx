@@ -10,7 +10,7 @@ interface Props {
 }
 
 interface LoginFormData {
-  email: string;
+  userId: string;
   password: string;
 }
 
@@ -31,7 +31,7 @@ export const LoginForm = ({ onLoginSuccess }: Props) => {
       onLoginSuccess();
     } catch (err) {
       setError("root", {
-        message: "로그인 실패: 이메일 또는 비밀번호를 확인하세요.",
+        message: "로그인 실패: 아이디 또는 비밀번호를 확인하세요.",
       });
     }
   };
@@ -39,15 +39,14 @@ export const LoginForm = ({ onLoginSuccess }: Props) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
-        label="이메일"
-        type="email"
-        placeholder="이메일을 입력하세요"
-        error={errors.email?.message}
-        {...register("email", {
-          required: "이메일을 입력해주세요",
-          pattern: {
-            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: "유효한 이메일 주소를 입력해주세요",
+        label="아이디"
+        placeholder="아이디를 입력하세요"
+        error={errors.userId?.message}
+        {...register("userId", {
+          required: "아이디를 입력해주세요",
+          minLength: {
+            value: 4,
+            message: "아이디는 최소 4자 이상이어야 합니다",
           },
         })}
       />
