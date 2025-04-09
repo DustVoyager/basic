@@ -1,39 +1,24 @@
-import React from "react";
-import { Outlet, useNavigate, Navigate } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import styles from "./MainLayout.module.scss";
+import Header from "./Header";
+import Footer from "./Footer";
 
 export default function MainLayout() {
-  const navigate = useNavigate();
-  const { isLoggedIn, clearTokens } = useAuthStore();
+  const { isLoggedIn } = useAuthStore();
 
-  // 로그인하지 않은 사용자는 로그인 페이지로 리다이렉트
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  const handleLogout = () => {
-    clearTokens();
-    navigate("/login");
-  };
+  // 잠시 주석 (로그인 후 레이아웃 작업 중)
+  // if (!isLoggedIn) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
   return (
     <div className={styles.container}>
-      <nav className={styles.navbar}>
-        <div className={styles.navbarContent}>
-          <div>
-            <h1 className={styles.logo}>My App</h1>
-          </div>
-          <div>
-            <button onClick={handleLogout} className={styles.logoutButton}>
-              로그아웃
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Header />
       <main className={styles.main}>
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }
