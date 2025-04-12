@@ -1,0 +1,136 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.paginationList {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.pageItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: #40a9ff;
+    color: #40a9ff;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #40a9ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+
+  &:disabled {
+    background-color: #f5f5f5;
+    border-color: #d9d9d9;
+    color: #00000040;
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: #d9d9d9;
+      color: #00000040;
+    }
+  }
+}
+
+.active {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+
+  &:hover {
+    background-color: #40a9ff;
+    border-color: #40a9ff;
+    color: #fff;
+  }
+}
+
+.arrow {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  color: #666;
+  user-select: none;
+}
+
+// Size variants
+.sm {
+  .pageItem {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+
+  .arrow {
+    font-size: 14px;
+  }
+
+  .ellipsis {
+    min-width: 24px;
+    height: 24px;
+  }
+}
+
+.md {
+  .pageItem {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 14px;
+  }
+
+  .arrow {
+    font-size: 16px;
+  }
+
+  .ellipsis {
+    min-width: 32px;
+    height: 32px;
+  }
+}
+
+.lg {
+  .pageItem {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    font-size: 16px;
+  }
+
+  .arrow {
+    font-size: 18px;
+  }
+
+  .ellipsis {
+    min-width: 40px;
+    height: 40px;
+  }
+}
