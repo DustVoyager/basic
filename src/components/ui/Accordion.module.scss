@@ -1,0 +1,63 @@
+.accordion {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.item {
+  border-bottom: 1px solid #e5e7eb;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+
+  &.active {
+    background-color: #f3f4f6;
+  }
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.icon {
+  font-size: 1.25rem;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+
+.content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: white;
+
+  &.open {
+    max-height: 1000px; // 충분히 큰 값으로 설정
+  }
+}
+
+.contentInner {
+  padding: 1rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
