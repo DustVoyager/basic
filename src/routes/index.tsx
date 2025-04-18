@@ -3,6 +3,7 @@ import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
 import LoginPage from "../pages/LoginPage";
 import HomePage from "../pages/HomePage";
+import Chart from "../pages/Chart";
 
 export const router = createBrowserRouter([
   {
@@ -24,5 +25,9 @@ export const router = createBrowserRouter([
         element: <LoginPage />,
       },
     ],
+  },
+  {
+    path: "/chart",
+    element: <Chart />,
   },
 ]);
