@@ -4,6 +4,7 @@ import MainLayout from "../layouts/MainLayout";
 import LoginPage from "../pages/LoginPage";
 import HomePage from "../pages/HomePage";
 import Chart from "../pages/Chart";
+import EditorPage from "../pages/EditorPage";
 
 export const router = createBrowserRouter([
   {
@@ -29,5 +30,9 @@ export const router = createBrowserRouter([
   {
     path: "/chart",
     element: <Chart />,
+  },
+  {
+    path: "/editor",
+    element: <EditorPage />,
   },
 ]);
