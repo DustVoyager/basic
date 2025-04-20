@@ -12,6 +12,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { Bar, Line, Pie } from "react-chartjs-2";
+import { downloadChartAsExcel } from "../utils/excelUtils";
 
 // ChartJS 등록
 ChartJS.register(
@@ -68,9 +69,22 @@ const Chart: React.FC = () => {
     ],
   };
 
+  const handleDownloadExcel = () => {
+    // 막대 차트 데이터를 Excel로 다운로드
+    downloadChartAsExcel(barData, "월별_판매량.xlsx");
+  };
+
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">차트 예제</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">차트 예제</h1>
+        <button
+          onClick={handleDownloadExcel}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Excel로 다운로드
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white p-4 rounded-lg shadow">
