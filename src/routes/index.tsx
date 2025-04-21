@@ -5,6 +5,7 @@ import LoginPage from "../pages/LoginPage";
 import HomePage from "../pages/HomePage";
 import Chart from "../pages/Chart";
 import EditorPage from "../pages/EditorPage";
+import FileUploadPage from "../pages/FileUploadPage";
 
 export const router = createBrowserRouter([
   {
@@ -34,5 +35,9 @@ export const router = createBrowserRouter([
   {
     path: "/editor",
     element: <EditorPage />,
+  },
+  {
+    path: "/upload",
+    element: <FileUploadPage />,
   },
 ]);
