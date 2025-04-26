@@ -1,4 +1,4 @@
-import axios from "axios";
+import { apiClient } from "./axiosInstance";
 import {
   PostRequest,
   PostResponse,
@@ -12,7 +12,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 // 이미지 업로드를 위한 presigned URL 생성
 const getPresignedUrl = async (fileName: string) => {
-  const response = await axios.get(`${API_BASE_URL}/upload/presigned-url`, {
+  const response = await apiClient.get(`${API_BASE_URL}/upload/presigned-url`, {
     params: { fileName },
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -24,7 +24,7 @@ const getPresignedUrl = async (fileName: string) => {
 // 이미지 업로드
 const uploadImage = async (file: File) => {
   const presignedUrl = await getPresignedUrl(file.name);
-  await axios.put(presignedUrl.url, file, {
+  await apiClient.put(presignedUrl.url, file, {
     headers: {
       "Content-Type": file.type,
     },
@@ -35,7 +35,7 @@ const uploadImage = async (file: File) => {
 export const postApi = {
   // 글 CRUD
   create: async (postData: PostRequest) => {
-    const response = await axios.post<PostResponse>(
+    const response = await apiClient.post<PostResponse>(
       `${API_BASE_URL}/posts`,
       postData,
       {
@@ -49,7 +49,7 @@ export const postApi = {
   },
 
   getList: async (params: SearchParams) => {
-    const response = await axios.get<PostListResponse>(
+    const response = await apiClient.get<PostListResponse>(
       `${API_BASE_URL}/posts`,
       {
         params,
@@ -62,7 +62,7 @@ export const postApi = {
   },
 
   getById: async (id: number) => {
-    const response = await axios.get<PostResponse>(
+    const response = await apiClient.get<PostResponse>(
       `${API_BASE_URL}/posts/${id}`,
       {
         headers: {
@@ -74,7 +74,7 @@ export const postApi = {
   },
 
   update: async (id: number, postData: Partial<PostRequest>) => {
-    const response = await axios.put<PostResponse>(
+    const response = await apiClient.put<PostResponse>(
       `${API_BASE_URL}/posts/${id}`,
       postData,
       {
@@ -87,7 +87,7 @@ export const postApi = {
   },
 
   delete: async (id: number) => {
-    await axios.delete(`${API_BASE_URL}/posts/${id}`, {
+    await apiClient.delete(`${API_BASE_URL}/posts/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -96,7 +96,7 @@ export const postApi = {
 
   // 임시 저장
   saveDraft: async (postData: Partial<PostRequest>) => {
-    const response = await axios.post<PostResponse>(
+    const response = await apiClient.post<PostResponse>(
       `${API_BASE_URL}/posts/draft`,
       { ...postData, isDraft: true },
       {
@@ -116,19 +116,21 @@ export const postApi = {
 
   // 카테고리
   getCategories: async () => {
-    const response = await axios.get<Category[]>(`${API_BASE_URL}/categories`);
+    const response = await apiClient.get<Category[]>(
+      `${API_BASE_URL}/categories`
+    );
     return response.data;
   },
 
   // 태그
   getTags: async () => {
-    const response = await axios.get<Tag[]>(`${API_BASE_URL}/tags`);
+    const response = await apiClient.get<Tag[]>(`${API_BASE_URL}/tags`);
     return response.data;
   },
 
   // 좋아요
   likePost: async (id: number) => {
-    const response = await axios.post<PostResponse>(
+    const response = await apiClient.post<PostResponse>(
       `${API_BASE_URL}/posts/${id}/like`,
       {},
       {
@@ -142,7 +144,7 @@ export const postApi = {
 
   // 조회수 증가
   incrementViewCount: async (id: number) => {
-    await axios.post(
+    await apiClient.post(
       `${API_BASE_URL}/posts/${id}/view`,
       {},
       {

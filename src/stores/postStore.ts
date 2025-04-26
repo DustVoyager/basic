@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import { postApi } from "../api/post";
 import {
   PostRequest,
@@ -7,25 +8,24 @@ import {
   Category,
   Tag,
   SearchParams,
+  Post,
 } from "../types/post";
 import { handleApiError } from "../utils/errorHandler";
+import { ApiState, PaginationParams, PaginatedResponse } from "../types/store";
 
-interface PostState {
+interface PostState extends ApiState<Post[]> {
   posts: PostResponse[];
   categories: Category[];
   tags: Tag[];
   currentPost: PostResponse | null;
-  isLoading: boolean;
-  error: Error | null;
   total: number;
-  page: number;
-  limit: number;
+  pagination: PaginationParams;
 
   // 액션들
-  createPost: (postData: PostRequest) => Promise<void>;
-  updatePost: (id: number, postData: Partial<PostRequest>) => Promise<void>;
-  deletePost: (id: number) => Promise<void>;
-  fetchPosts: (params: SearchParams) => Promise<void>;
+  fetchPosts: () => Promise<void>;
+  createPost: (post: Omit<Post, "id">) => Promise<void>;
+  updatePost: (id: string, post: Partial<Post>) => Promise<void>;
+  deletePost: (id: string) => Promise<void>;
   fetchPostById: (id: number) => Promise<void>;
   saveDraft: (postData: Partial<PostRequest>) => Promise<void>;
   uploadImage: (file: File) => Promise<string>;
@@ -49,193 +49,153 @@ const TEMP_TAGS = [
   { id: 4, name: "CSS", postCount: 0 },
 ];
 
-export const usePostStore = create<PostState>((set, get) => ({
-  posts: [],
-  categories: TEMP_CATEGORIES,
-  tags: TEMP_TAGS,
-  currentPost: null,
-  isLoading: false,
-  error: null,
-  total: 0,
-  page: 1,
-  limit: 10,
+export const usePostStore = create<PostState>()(
+  devtools(
+    (set, get) => ({
+      posts: [],
+      categories: TEMP_CATEGORIES,
+      tags: TEMP_TAGS,
+      currentPost: null,
+      total: 0,
+      pagination: {
+        page: 1,
+        limit: 10,
+      },
 
-  createPost: async (postData) => {
-    try {
-      set({ isLoading: true, error: null });
-      const newPost = await postApi.create(postData);
-      set((state) => ({
-        posts: [newPost, ...state.posts],
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      fetchPosts: async () => {
+        try {
+          set({ loading: true, error: null });
+          const { page, limit } = get().pagination;
+          const response = await postApi.getPosts({ page, limit });
+          set({ data: response.data, loading: false });
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  updatePost: async (id, postData) => {
-    try {
-      set({ isLoading: true, error: null });
-      const updatedPost = await postApi.update(id, postData);
-      set((state) => ({
-        posts: state.posts.map((post) => (post.id === id ? updatedPost : post)),
-        currentPost:
-          state.currentPost?.id === id ? updatedPost : state.currentPost,
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      createPost: async (post) => {
+        try {
+          set({ loading: true, error: null });
+          await postApi.createPost(post);
+          await get().fetchPosts();
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  deletePost: async (id) => {
-    try {
-      set({ isLoading: true, error: null });
-      await postApi.delete(id);
-      set((state) => ({
-        posts: state.posts.filter((post) => post.id !== id),
-        currentPost: state.currentPost?.id === id ? null : state.currentPost,
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      updatePost: async (id, post) => {
+        try {
+          set({ loading: true, error: null });
+          await postApi.updatePost(id, post);
+          await get().fetchPosts();
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  fetchPosts: async (params) => {
-    try {
-      set({ isLoading: true, error: null });
-      const response = await postApi.getList(params);
-      set({
-        posts: response.posts,
-        total: response.total,
-        page: response.page,
-        limit: response.limit,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      deletePost: async (id) => {
+        try {
+          set({ loading: true, error: null });
+          await postApi.deletePost(id);
+          await get().fetchPosts();
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  fetchPostById: async (id) => {
-    try {
-      set({ isLoading: true, error: null });
-      const post = await postApi.getById(id);
-      set({ currentPost: post, isLoading: false });
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      fetchPostById: async (id) => {
+        try {
+          set({ loading: true, error: null });
+          const post = await postApi.getById(id);
+          set({ currentPost: post, loading: false });
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  saveDraft: async (postData) => {
-    try {
-      set({ isLoading: true, error: null });
-      const draft = await postApi.saveDraft(postData);
-      set((state) => ({
-        posts: [draft, ...state.posts],
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      saveDraft: async (postData) => {
+        try {
+          set({ loading: true, error: null });
+          const draft = await postApi.saveDraft(postData);
+          set((state) => ({
+            posts: [draft, ...state.posts],
+            loading: false,
+          }));
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  uploadImage: async (file) => {
-    try {
-      set({ isLoading: true, error: null });
-      const imageUrl = await postApi.uploadImage(file);
-      set({ isLoading: false });
-      return imageUrl;
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-      throw error;
-    }
-  },
+      uploadImage: async (file) => {
+        try {
+          set({ loading: true, error: null });
+          const imageUrl = await postApi.uploadImage(file);
+          set({ loading: false });
+          return imageUrl;
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+          throw error;
+        }
+      },
 
-  fetchCategories: async () => {
-    try {
-      set({ isLoading: true, error: null });
-      // API 호출 대신 임시 데이터 사용
-      set({ categories: TEMP_CATEGORIES });
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      fetchCategories: async () => {
+        try {
+          set({ loading: true, error: null });
+          // API 호출 대신 임시 데이터 사용
+          set({ categories: TEMP_CATEGORIES });
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        } finally {
+          set({ loading: false });
+        }
+      },
 
-  fetchTags: async () => {
-    try {
-      set({ isLoading: true, error: null });
-      // API 호출 대신 임시 데이터 사용
-      set({ tags: TEMP_TAGS });
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      fetchTags: async () => {
+        try {
+          set({ loading: true, error: null });
+          // API 호출 대신 임시 데이터 사용
+          set({ tags: TEMP_TAGS });
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        } finally {
+          set({ loading: false });
+        }
+      },
 
-  likePost: async (id) => {
-    try {
-      set({ isLoading: true, error: null });
-      const updatedPost = await postApi.likePost(id);
-      set((state) => ({
-        posts: state.posts.map((post) => (post.id === id ? updatedPost : post)),
-        currentPost:
-          state.currentPost?.id === id ? updatedPost : state.currentPost,
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({
-        error: handleApiError(error),
-        isLoading: false,
-      });
-    }
-  },
+      likePost: async (id) => {
+        try {
+          set({ loading: true, error: null });
+          const updatedPost = await postApi.likePost(id);
+          set((state) => ({
+            posts: state.posts.map((post) =>
+              post.id === id ? updatedPost : post
+            ),
+            currentPost:
+              state.currentPost?.id === id ? updatedPost : state.currentPost,
+            loading: false,
+          }));
+        } catch (error) {
+          set({ error: error as Error, loading: false });
+        }
+      },
 
-  incrementViewCount: async (id) => {
-    try {
-      await postApi.incrementViewCount(id);
-      set((state) => ({
-        currentPost:
-          state.currentPost?.id === id
-            ? {
-                ...state.currentPost,
-                viewCount: state.currentPost.viewCount + 1,
-              }
-            : state.currentPost,
-      }));
-    } catch (error) {
-      console.error("조회수 증가 실패:", error);
-    }
-  },
-}));
+      incrementViewCount: async (id) => {
+        try {
+          await postApi.incrementViewCount(id);
+          set((state) => ({
+            currentPost:
+              state.currentPost?.id === id
+                ? {
+                    ...state.currentPost,
+                    viewCount: state.currentPost.viewCount + 1,
+                  }
+                : state.currentPost,
+          }));
+        } catch (error) {
+          console.error("조회수 증가 실패:", error);
+        }
+      },
+    }),
+    { name: "postStore" }
+  )
+);
