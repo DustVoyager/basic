@@ -2,6 +2,11 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import { ApiError, ApiConfig } from "../types/api";
 
+interface AxiosErrorResponse {
+  message?: string;
+  code?: string;
+}
+
 class ApiClient {
   private instance: AxiosInstance;
 
@@ -32,7 +37,7 @@ class ApiClient {
 
     this.instance.interceptors.response.use(
       (response) => response,
-      (error: AxiosError) => {
+      (error: AxiosError<AxiosErrorResponse>) => {
         const apiError: ApiError = {
           message:
             error.response?.data?.message || "알 수 없는 오류가 발생했습니다.",

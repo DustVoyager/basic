@@ -6,6 +6,7 @@ import {
   Category,
   Tag,
   SearchParams,
+  Post,
 } from "../types/post";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
@@ -34,64 +35,27 @@ const uploadImage = async (file: File) => {
 
 export const postApi = {
   // 글 CRUD
-  create: async (postData: PostRequest) => {
-    const response = await apiClient.post<PostResponse>(
-      `${API_BASE_URL}/posts`,
-      postData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
+  getPosts: async (params: SearchParams): Promise<PostListResponse> => {
+    return apiClient.get<PostListResponse>("/posts", { params });
   },
 
-  getList: async (params: SearchParams) => {
-    const response = await apiClient.get<PostListResponse>(
-      `${API_BASE_URL}/posts`,
-      {
-        params,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
+  getPostById: async (id: string): Promise<PostResponse> => {
+    return apiClient.get<PostResponse>(`/posts/${id}`);
   },
 
-  getById: async (id: number) => {
-    const response = await apiClient.get<PostResponse>(
-      `${API_BASE_URL}/posts/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
+  createPost: async (post: Omit<Post, "id">): Promise<PostResponse> => {
+    return apiClient.post<PostResponse>("/posts", post);
   },
 
-  update: async (id: number, postData: Partial<PostRequest>) => {
-    const response = await apiClient.put<PostResponse>(
-      `${API_BASE_URL}/posts/${id}`,
-      postData,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
+  updatePost: async (
+    id: string,
+    post: Partial<Post>
+  ): Promise<PostResponse> => {
+    return apiClient.put<PostResponse>(`/posts/${id}`, post);
   },
 
-  delete: async (id: number) => {
-    await apiClient.delete(`${API_BASE_URL}/posts/${id}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+  deletePost: async (id: string): Promise<void> => {
+    return apiClient.delete<void>(`/posts/${id}`);
   },
 
   // 임시 저장
@@ -109,9 +73,14 @@ export const postApi = {
   },
 
   // 이미지 업로드
-  uploadImage: async (file: File) => {
-    const imageKey = await uploadImage(file);
-    return `${API_BASE_URL}/images/${imageKey}`;
+  uploadImage: async (file: File): Promise<{ url: string }> => {
+    const formData = new FormData();
+    formData.append("image", file);
+    return apiClient.post<{ url: string }>("/posts/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
   // 카테고리
@@ -129,29 +98,12 @@ export const postApi = {
   },
 
   // 좋아요
-  likePost: async (id: number) => {
-    const response = await apiClient.post<PostResponse>(
-      `${API_BASE_URL}/posts/${id}/like`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
+  likePost: async (id: string): Promise<PostResponse> => {
+    return apiClient.post<PostResponse>(`/posts/${id}/like`);
   },
 
   // 조회수 증가
-  incrementViewCount: async (id: number) => {
-    await apiClient.post(
-      `${API_BASE_URL}/posts/${id}/view`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+  incrementViewCount: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/posts/${id}/view`);
   },
 };

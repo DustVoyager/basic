@@ -13,26 +13,16 @@ import {
 import { handleApiError } from "../utils/errorHandler";
 import { ApiState, PaginationParams, PaginatedResponse } from "../types/store";
 
-interface PostState extends ApiState<Post[]> {
-  posts: PostResponse[];
-  categories: Category[];
-  tags: Tag[];
+interface PostState extends ApiState<PostResponse[]> {
   currentPost: PostResponse | null;
-  total: number;
   pagination: PaginationParams;
-
-  // 액션들
   fetchPosts: () => Promise<void>;
   createPost: (post: Omit<Post, "id">) => Promise<void>;
   updatePost: (id: string, post: Partial<Post>) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
-  fetchPostById: (id: number) => Promise<void>;
-  saveDraft: (postData: Partial<PostRequest>) => Promise<void>;
-  uploadImage: (file: File) => Promise<string>;
-  fetchCategories: () => Promise<void>;
-  fetchTags: () => Promise<void>;
-  likePost: (id: number) => Promise<void>;
-  incrementViewCount: (id: number) => Promise<void>;
+  fetchPostById: (id: string) => Promise<void>;
+  likePost: (id: string) => Promise<void>;
+  incrementViewCount: (id: string) => Promise<void>;
 }
 
 // 임시 데이터
@@ -52,11 +42,10 @@ const TEMP_TAGS = [
 export const usePostStore = create<PostState>()(
   devtools(
     (set, get) => ({
-      posts: [],
-      categories: TEMP_CATEGORIES,
-      tags: TEMP_TAGS,
+      data: null,
+      loading: false,
+      error: null,
       currentPost: null,
-      total: 0,
       pagination: {
         page: 1,
         limit: 10,
@@ -67,7 +56,7 @@ export const usePostStore = create<PostState>()(
           set({ loading: true, error: null });
           const { page, limit } = get().pagination;
           const response = await postApi.getPosts({ page, limit });
-          set({ data: response.data, loading: false });
+          set({ data: response, loading: false });
         } catch (error) {
           set({ error: error as Error, loading: false });
         }
@@ -106,59 +95,10 @@ export const usePostStore = create<PostState>()(
       fetchPostById: async (id) => {
         try {
           set({ loading: true, error: null });
-          const post = await postApi.getById(id);
+          const post = await postApi.getPostById(id);
           set({ currentPost: post, loading: false });
         } catch (error) {
           set({ error: error as Error, loading: false });
-        }
-      },
-
-      saveDraft: async (postData) => {
-        try {
-          set({ loading: true, error: null });
-          const draft = await postApi.saveDraft(postData);
-          set((state) => ({
-            posts: [draft, ...state.posts],
-            loading: false,
-          }));
-        } catch (error) {
-          set({ error: error as Error, loading: false });
-        }
-      },
-
-      uploadImage: async (file) => {
-        try {
-          set({ loading: true, error: null });
-          const imageUrl = await postApi.uploadImage(file);
-          set({ loading: false });
-          return imageUrl;
-        } catch (error) {
-          set({ error: error as Error, loading: false });
-          throw error;
-        }
-      },
-
-      fetchCategories: async () => {
-        try {
-          set({ loading: true, error: null });
-          // API 호출 대신 임시 데이터 사용
-          set({ categories: TEMP_CATEGORIES });
-        } catch (error) {
-          set({ error: error as Error, loading: false });
-        } finally {
-          set({ loading: false });
-        }
-      },
-
-      fetchTags: async () => {
-        try {
-          set({ loading: true, error: null });
-          // API 호출 대신 임시 데이터 사용
-          set({ tags: TEMP_TAGS });
-        } catch (error) {
-          set({ error: error as Error, loading: false });
-        } finally {
-          set({ loading: false });
         }
       },
 
@@ -167,9 +107,10 @@ export const usePostStore = create<PostState>()(
           set({ loading: true, error: null });
           const updatedPost = await postApi.likePost(id);
           set((state) => ({
-            posts: state.posts.map((post) =>
-              post.id === id ? updatedPost : post
-            ),
+            data:
+              state.data?.map((post) =>
+                post.id === id ? updatedPost : post
+              ) || null,
             currentPost:
               state.currentPost?.id === id ? updatedPost : state.currentPost,
             loading: false,
