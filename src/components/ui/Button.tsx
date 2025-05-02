@@ -1,53 +1,42 @@
-import React from "react";
+import clsx from "clsx";
 import styles from "./Button.module.scss";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  isLoading?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  className?: string;
+  type?: "button" | "submit";
 }
 
-const Button: React.FC<ButtonProps> = ({
+export default function Button({
   children,
   variant = "primary",
   size = "md",
-  isLoading = false,
-  leftIcon,
-  rightIcon,
   className,
   disabled,
+  type = "button",
   ...props
-}) => {
-  const buttonClasses = [
+}: ButtonProps) {
+  const buttonClasses = clsx(
     styles.button,
-    styles[variant],
-    styles[size],
-    isLoading && styles.loading,
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+    styles[`variant-${variant}`],
+    styles[`size-${size}`],
+    disabled && styles.disabled,
+    className
+  );
 
   return (
     <button
       className={buttonClasses}
-      disabled={disabled || isLoading}
+      disabled={disabled}
+      type={type}
       {...props}
     >
-      {leftIcon && !isLoading && (
-        <span className={styles.leftIcon}>{leftIcon}</span>
-      )}
       {children}
-      {rightIcon && !isLoading && (
-        <span className={styles.rightIcon}>{rightIcon}</span>
-      )}
     </button>
   );
-};
-
-export default Button;
+}
