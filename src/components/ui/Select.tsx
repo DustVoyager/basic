@@ -1,109 +1,102 @@
-import React from "react";
-import clsx from "clsx";
+import { useState, useRef, useCallback } from "react";
 import styles from "./Select.module.scss";
-
-type SelectSize = "sm" | "md" | "lg";
-type LabelPosition = "inline" | "top";
+import clsx from "clsx";
+import { FaChevronDown } from "react-icons/fa";
 
 export interface SelectOption {
   value: string;
   label: string;
+  disabled?: boolean;
 }
 
-interface SelectProps
-  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "id"> {
-  id: string;
-  label?: string;
-  error?: string;
-  helperText?: string;
-  size?: SelectSize;
-  required?: boolean;
-  labelPosition?: LabelPosition;
-  labelWidth?: string | number;
+export interface SelectProps {
   options: SelectOption[];
+  value: string;
+  onChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  error?: string;
 }
 
-function Select({
-  id,
-  label,
-  error,
-  helperText,
-  size = "md",
-  required,
-  labelPosition = "inline",
-  labelWidth,
-  className,
-  disabled,
+export default function Select({
   options,
-  placeholder,
-  ...props
+  value,
+  onChange,
+  placeholder = "선택하세요",
+  disabled = false,
+  className = "",
+  error,
 }: SelectProps) {
-  const labelStyle = labelWidth
-    ? {
-        width: typeof labelWidth === "number" ? `${labelWidth}px` : labelWidth,
-        flexShrink: 0,
+  const [isOpen, setIsOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find((option) => option.value === value);
+
+  const toggleDropdown = useCallback(() => {
+    if (!disabled) {
+      setIsOpen((prev) => !prev);
+    }
+  }, [disabled]);
+
+  const handleSelect = useCallback(
+    (option: SelectOption) => {
+      if (!option.disabled) {
+        onChange(option.value);
+        setIsOpen(false);
       }
-    : undefined;
-
-  const selectClasses = clsx(
-    styles.select,
-    styles[size],
-    error && styles.error,
-    className
+    },
+    [onChange]
   );
-
-  const containerClasses = clsx(
-    styles.selectContainer,
-    labelPosition === "top" && styles.selectContainerTop
-  );
-
-  const labelClasses = clsx(
-    styles.label,
-    labelPosition === "top" && styles.labelTop
-  );
-
-  const helperTextClasses = clsx(styles.helperText, error && styles.errorText);
 
   return (
-    <div className={styles.selectWrapper}>
-      <div className={containerClasses}>
-        {label && (
-          <label
-            htmlFor={id}
-            className={labelClasses}
-            style={labelPosition === "inline" ? labelStyle : undefined}
+    <div className={styles.selectContainer}>
+      <div
+        ref={selectRef}
+        className={clsx(styles.select, className, {
+          [styles.disabled]: disabled,
+          [styles.error]: !!error,
+        })}
+      >
+        <div className={styles.selectTrigger} onClick={toggleDropdown}>
+          <span
+            className={clsx(styles.selectValue, {
+              [styles.placeholder]: !value,
+            })}
           >
-            {label}
-            {required && <span className={styles.required}>*</span>}
-          </label>
-        )}
-        <div className={styles.selectContent}>
-          <select
-            className={selectClasses}
-            disabled={disabled}
-            aria-invalid={error ? "true" : "false"}
-            id={id}
-            {...props}
-          >
-            {placeholder && (
-              <option value="" disabled>
-                {placeholder}
-              </option>
-            )}
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          <FaChevronDown
+            className={clsx(styles.selectIcon, {
+              [styles.open]: isOpen,
+            })}
+          />
         </div>
+
+        {isOpen && (
+          <div className={styles.selectContent}>
+            <ul className={styles.selectOptions} role="listbox">
+              {options.map((option) => (
+                <li
+                  key={option.value}
+                  className={clsx(styles.selectOption, {
+                    [styles.selected]: option.value === value,
+                    [styles.disabled]: option.disabled,
+                  })}
+                  onClick={() => handleSelect(option)}
+                >
+                  {option.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-      {(error || helperText) && (
-        <span className={helperTextClasses}>{error || helperText}</span>
+      {error && (
+        <p id="select-error" className={styles.errorMessage}>
+          {error}
+        </p>
       )}
     </div>
   );
 }
-
-export default Select;
