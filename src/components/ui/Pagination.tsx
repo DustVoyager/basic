@@ -1,142 +1,85 @@
-import React from "react";
-import clsx from "clsx";
+import {
+  FiChevronsLeft,
+  FiChevronLeft,
+  FiChevronRight,
+  FiChevronsRight,
+} from "react-icons/fi";
 import styles from "./Pagination.module.scss";
-
-type PaginationSize = "sm" | "md" | "lg";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
+  maxPage?: number;
   onPageChange: (page: number) => void;
-  size?: PaginationSize;
-  className?: string;
 }
 
-const VISIBLE_PAGES = 10;
-
-function Pagination({
+export default function Pagination({
   currentPage,
   totalPages,
+  maxPage,
   onPageChange,
-  size = "md",
-  className,
 }: PaginationProps) {
-  const getPageNumbers = () => {
-    const pages = [];
-    let startPage = Math.max(1, currentPage - Math.floor(VISIBLE_PAGES / 2));
-    let endPage = Math.min(totalPages, startPage + VISIBLE_PAGES - 1);
-
-    if (endPage - startPage + 1 < VISIBLE_PAGES) {
-      startPage = Math.max(1, endPage - VISIBLE_PAGES + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
-
-  const handlePageChange = (page: number) => {
+  const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       onPageChange(page);
     }
   };
 
-  const pageNumbers = getPageNumbers();
+  const visiblePages = maxPage || 10;
+  const halfVisiblePages = Math.floor(visiblePages / 2);
+
+  let startPage = currentPage - halfVisiblePages;
+  let endPage = currentPage + halfVisiblePages;
+
+  if (startPage < 1) {
+    startPage = 1;
+    endPage = Math.min(visiblePages, totalPages);
+  }
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, totalPages - visiblePages + 1);
+  }
+
+  const pageNumbers = Array.from(
+    { length: endPage - startPage + 1 },
+    (_, index) => startPage + index
+  );
 
   return (
-    <nav className={clsx(styles.pagination, styles[size], className)}>
-      <ul className={styles.paginationList}>
-        <li>
-          <button
-            className={clsx(styles.pageItem, styles.arrow)}
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
-            aria-label="첫 페이지로 이동"
-          >
-            «
-          </button>
-        </li>
-        <li>
-          <button
-            className={clsx(styles.pageItem, styles.arrow)}
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            aria-label="이전 페이지로 이동"
-          >
-            ‹
-          </button>
-        </li>
+    <div className={styles.pagination}>
+      <button disabled={currentPage === 1} onClick={() => handlePageClick(1)}>
+        <FiChevronsLeft />
+      </button>
+      <button
+        disabled={currentPage === 1}
+        onClick={() => handlePageClick(currentPage - 1)}
+      >
+        <FiChevronLeft />
+      </button>
 
-        {pageNumbers[0] > 1 && (
-          <>
-            <li>
-              <button
-                className={styles.pageItem}
-                onClick={() => handlePageChange(1)}
-              >
-                1
-              </button>
-            </li>
-            {pageNumbers[0] > 2 && <li className={styles.ellipsis}>...</li>}
-          </>
-        )}
+      {pageNumbers.map((pageNum) => (
+        <button
+          key={pageNum}
+          className={currentPage === pageNum ? styles.currentPage : ""}
+          onClick={() => handlePageClick(pageNum)}
+        >
+          {pageNum}
+        </button>
+      ))}
 
-        {pageNumbers.map((page) => (
-          <li key={page}>
-            <button
-              className={clsx(
-                styles.pageItem,
-                currentPage === page && styles.active
-              )}
-              onClick={() => handlePageChange(page)}
-              aria-current={currentPage === page ? "page" : undefined}
-            >
-              {page}
-            </button>
-          </li>
-        ))}
-
-        {pageNumbers[pageNumbers.length - 1] < totalPages && (
-          <>
-            {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
-              <li className={styles.ellipsis}>...</li>
-            )}
-            <li>
-              <button
-                className={styles.pageItem}
-                onClick={() => handlePageChange(totalPages)}
-              >
-                {totalPages}
-              </button>
-            </li>
-          </>
-        )}
-
-        <li>
-          <button
-            className={clsx(styles.pageItem, styles.arrow)}
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            aria-label="다음 페이지로 이동"
-          >
-            ›
-          </button>
-        </li>
-        <li>
-          <button
-            className={clsx(styles.pageItem, styles.arrow)}
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            aria-label="마지막 페이지로 이동"
-          >
-            »
-          </button>
-        </li>
-      </ul>
-    </nav>
+      <button
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageClick(currentPage + 1)}
+      >
+        <FiChevronRight />
+      </button>
+      <button
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageClick(totalPages)}
+      >
+        <FiChevronsRight />
+      </button>
+    </div>
   );
 }
-
-export default Pagination;
