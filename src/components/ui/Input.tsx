@@ -1,97 +1,80 @@
-import React from "react";
-import clsx from "clsx";
+import { InputHTMLAttributes } from "react";
 import styles from "./Input.module.scss";
+import clsx from "clsx";
 
-type InputSize = "sm" | "md" | "lg";
-type LabelPosition = "inline" | "top";
+export type InputSize = "sm" | "md" | "lg";
+export type LabelPosition = "top" | "left" | "none";
 
-interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "id"> {
-  id: string;
+type InputBaseProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size">;
+
+export interface InputProps extends InputBaseProps {
+  id?: string;
   label?: string;
-  error?: string;
-  helperText?: string;
-  size?: InputSize;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  required?: boolean;
   labelPosition?: LabelPosition;
-  labelWidth?: string | number;
+  size?: InputSize;
+  error?: string;
+  isFullWidth?: boolean;
+  className?: string;
+  labelClassName?: string;
+  inputClassName?: string;
 }
 
-function Input({
+export function Input({
   id,
   label,
-  error,
-  helperText,
+  labelPosition = "top",
   size = "md",
-  leftIcon,
-  rightIcon,
-  required,
-  labelPosition = "inline",
-  labelWidth,
+  error,
+  isFullWidth = false,
   className,
+  labelClassName,
+  inputClassName,
   disabled,
+  required,
   ...props
 }: InputProps) {
-  const labelStyle = labelWidth
-    ? {
-        width: typeof labelWidth === "number" ? `${labelWidth}px` : labelWidth,
-        flexShrink: 0,
-      }
-    : undefined;
+  const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`;
 
-  const inputClasses = clsx(
-    styles.input,
-    styles[size],
-    error && styles.error,
-    leftIcon && styles.withLeftIcon,
-    rightIcon && styles.withRightIcon,
+  const containerClasses = clsx(
+    styles.container,
+    labelPosition === "left" && styles.containerHorizontal,
+    isFullWidth && styles.fullWidth,
     className
   );
 
-  const containerClasses = clsx(
-    styles.inputContainer,
-    labelPosition === "top" && styles.inputContainerTop
+  const wrapperClasses = clsx(
+    styles.inputWrapper,
+    styles[`size-${size}`],
+    error && styles.hasError,
+    disabled && styles.disabled
   );
 
   const labelClasses = clsx(
     styles.label,
-    labelPosition === "top" && styles.labelTop
+    labelPosition === "left" && styles.labelLeft,
+    required && styles.required,
+    labelClassName
   );
 
-  const helperTextClasses = clsx(styles.helperText, error && styles.errorText);
+  const inputClasses = clsx(styles.input, inputClassName);
 
   return (
-    <div className={styles.inputWrapper}>
-      <div className={containerClasses}>
-        {label && (
-          <label
-            htmlFor={id}
-            className={labelClasses}
-            style={labelPosition === "inline" ? labelStyle : undefined}
-          >
-            {label}
-            {required && <span className={styles.required}>*</span>}
-          </label>
-        )}
-        <div className={styles.inputContent}>
-          {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
-          <input
-            className={inputClasses}
-            disabled={disabled}
-            aria-invalid={error ? "true" : "false"}
-            id={id}
-            {...props}
-          />
-          {rightIcon && <span className={styles.rightIcon}>{rightIcon}</span>}
-        </div>
-      </div>
-      {(error || helperText) && (
-        <span className={helperTextClasses}>{error || helperText}</span>
+    <div className={containerClasses}>
+      {label && labelPosition !== "none" && (
+        <label htmlFor={inputId} className={labelClasses}>
+          {label}
+        </label>
       )}
+      <div className={wrapperClasses}>
+        <input
+          id={inputId}
+          className={inputClasses}
+          disabled={disabled}
+          required={required}
+          {...props}
+        />
+      </div>
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 }
-
-export default Input;
