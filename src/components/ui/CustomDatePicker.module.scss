@@ -1,0 +1,80 @@
+/**
+* datepicker cumtom style은
+* src/assets/styles/global.scss 에 위치하고 있습니다.
+*/
+
+.datePickerContainer {
+  position: relative;
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+  width: fit-content;
+}
+
+.dateInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 40px 0 16px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a202c;
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dateInput:hover {
+  border-color: #cbd5e0;
+}
+
+.dateInput:focus {
+  border-color: #3182ce;
+}
+
+.calendarIcon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: #718096;
+  pointer-events: none;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.calendar {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.day {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  margin: 2px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.day:hover {
+  background: #ebf8ff;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: #3182ce;
+  color: #fff;
+}
